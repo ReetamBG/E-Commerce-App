@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken"
 // generate tokens with userId as payload
 const generateToken = (userId)=>{
     const accessToken = jwt.sign({userId}, process.env.ACCESS_TOKEN_JWT_KEY, {expiresIn: "15m"})
-    const refreshToken = jwt.sign({userId}, process.env.ACCESS_TOKEN_JWT_KEY, {expiresIn: "1h"})
+    const refreshToken = jwt.sign({userId}, process.env.REFRESH_TOKEN_JWT_KEY, {expiresIn: "1h"})
     return {accessToken, refreshToken}
 }
 
@@ -106,16 +106,15 @@ const login = async(req, res)=>{
 const logout = async (req, res)=>{
     try{
         const accessToken = req.cookies.accessToken
-        if(accessToken){
-            const decodedAccessToken = jwt.verify(accessToken, process.env.ACCESS_TOKEN_JWT_KEY)
-            const userId = decodedAccessToken.userId
-            await redis.del(`refreshToken:${userId}`)       // clear refresh token from redis
-            res.clearCookie("accessToken")                  // clear access token from cookie
-            res.status(200).json({message: "Logged out successfully"})
+        if(!accessToken){
+            res.status(401).json({message: "Invalid Credentials"})  
         }
-        else{
-            res.status(401).json({message: "Invalid Credentials"})
-        }
+        const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_JWT_KEY)
+        const userId = decoded.userId
+        await redis.del(`refreshToken:${userId}`)       // clear refresh token from redis
+        res.clearCookie("accessToken")                  // clear access token from cookie
+        res.clearCookie("refreshToken")                 // clear refresh token from cookie
+        res.status(200).json({message: "Logged out successfully"})
     }
     catch(error){
         console.log("Error in logout controller: " + error)
@@ -135,11 +134,11 @@ const refreshAccessToken = async (req, res)=>{
         const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_JWT_KEY)
         const userId = decoded.userId
         const storedToken = await redis.get(`refreshToken:${userId}`)
-        if(storedToken != refreshToken){
+        if(storedToken != refreshToken){            // compare cookie refreshToken with redis refreshToken
             return res.status(401).json({message: "Invalid refresh token"})
         } 
         const newAccessToken = jwt.sign({userId}, process.env.ACCESS_TOKEN_JWT_KEY, {expiresIn: "15m"})
-        res.setCookie(
+        res.cookie(
             "accessToken", newAccessToken,
             {
                 httpOnly: true,
