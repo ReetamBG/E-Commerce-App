@@ -9,22 +9,31 @@ const generateToken = (userId)=>{
     return {accessToken, refreshToken}
 }
 
-// store access token in cookies
-const storeAccessToken = (res, accessToken)=>{
+// send acces and refresh token in cookies
+const setCookie = (res, accessToken, refreshToken)=>{
     res.cookie(
         "accessToken", accessToken,
         {
-            maxAge: 15 * 60 * 60,                               // gets deleted after 15m (optional as we already set jwt ttl)
+            maxAge: 15 * 60 * 1000,                             // gets deleted after 15m (optional as we already set jwt ttl)
             httpOnly: true,                                     // prevents XSS attacks (no idea wtf is this)
             secure: process.env.NODE_ENV === "production",      // send over https if in production mode
             sameSite: "strict"                                  // prevents CSRF attacks (no idea wtf is this)
+        } 
+    )
+    res.cookie(
+        "refreshToken", refreshToken,
+        {
+            maxAge: 7 * 24 * 60 * 60 * 1000,                    // gets deleted after 7days
+            httpOnly: true,                                     
+            secure: process.env.NODE_ENV === "production",      
+            sameSite: "strict"                                 
         } 
     )
 }
 
 // store refresh tokens in redis
 const storeRefreshToken = async (userId, refreshToken)=>{
-    await redis.set(`refreshToken:${userId}`, refreshToken)
+    await redis.set(`refreshToken:${userId}`, refreshToken, "EX", 7 * 24 * 60 * 60)     // expires in 7 days (EX => seconds)
 }
 
 
@@ -38,7 +47,7 @@ const signup = async (req, res)=>{
         }
         const user = await User.create({name, email, password})         // create user
         const {accessToken, refreshToken} = generateToken(user._id)     // create token based on user id
-        storeAccessToken(res, accessToken)                              // store access token in cookies
+        setCookie(res, accessToken, refreshToken)                       // store access token in cookies
         await storeRefreshToken(user._id, refreshToken)                 // store refresh token in Redis
         
         res.status(201).json(
@@ -54,6 +63,7 @@ const signup = async (req, res)=>{
         )
     }
     catch(error){
+        console.log("Error in signup controller" + error)
         res.status(500).json({message: error.message})
     }
 }
@@ -67,7 +77,7 @@ const login = async(req, res)=>{
 
         if(user && (await user.comparePassword(password))){
             const {accessToken, refreshToken} = generateToken(user._id)     // create token based on user id
-            storeAccessToken(res, accessToken)                              // store access token in cookies
+            setCookie(res, accessToken, refreshToken)                       // store access token in cookies
             await storeRefreshToken(user._id, refreshToken)                 // store refresh token in Redis
             res.status(200).json(
                 {
@@ -86,7 +96,7 @@ const login = async(req, res)=>{
         }
     }
     catch(error){
-        console.log("Error: " + error)
+        console.log("Error in login controller: " + error)
         res.status(500).json({message: error.message})
     }
 }
@@ -108,9 +118,42 @@ const logout = async (req, res)=>{
         }
     }
     catch(error){
-        console.log("Error: " + error)
+        console.log("Error in logout controller: " + error)
         res.status(500).json({message: error.message})
     }
 }
 
-export {signup, login, logout}
+
+// refresh access token 
+// get the refresh token from cookies, check if it matches with the redis one, then provide new access token
+const refreshAccessToken = async (req, res)=>{
+    try {
+        const refreshToken = req.cookies.refreshToken
+        if(!refreshToken){
+            return res.status(401).json({message: "No refresh token provided"})
+        }
+        const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_JWT_KEY)
+        const userId = decoded.userId
+        const storedToken = await redis.get(`refreshToken:${userId}`)
+        if(storedToken != refreshToken){
+            return res.status(401).json({message: "Invalid refresh token"})
+        } 
+        const newAccessToken = jwt.sign({userId}, process.env.ACCESS_TOKEN_JWT_KEY, {expiresIn: "15m"})
+        res.setCookie(
+            "accessToken", newAccessToken,
+            {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "strict",
+                maxAge: 15 * 60 * 1000,
+            }
+        )
+        res.status(200).json({message: "Access token refreshed successfully"})
+    }
+    catch(error){
+        console.log("Error in refreshAccessToken controller: " + error)
+        res.status(500).json({message: error.message})
+    }
+}
+
+export {signup, login, logout, refreshAccessToken}
