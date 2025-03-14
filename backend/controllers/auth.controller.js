@@ -107,7 +107,7 @@ const logout = async (req, res)=>{
     try{
         const accessToken = req.cookies.accessToken
         if(!accessToken){
-            res.status(401).json({message: "Invalid Credentials"})  
+            return res.status(401).json({message: "Invalid Credentials"})  
         }
         const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_JWT_KEY)
         const userId = decoded.userId
@@ -134,7 +134,7 @@ const refreshAccessToken = async (req, res)=>{
         const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_JWT_KEY)
         const userId = decoded.userId
         const storedToken = await redis.get(`refreshToken:${userId}`)
-        if(storedToken != refreshToken){            // compare cookie refreshToken with redis refreshToken
+        if(storedToken !== refreshToken){            // compare cookie refreshToken with redis refreshToken
             return res.status(401).json({message: "Invalid refresh token"})
         } 
         const newAccessToken = jwt.sign({userId}, process.env.ACCESS_TOKEN_JWT_KEY, {expiresIn: "15m"})
