@@ -1,5 +1,5 @@
 import express from "express"
-import { protectRoute, adminRoute } from "../middleware/auth.middleware"
+import { protectRoute, adminRoute } from "../middleware/auth.middleware.js"
 import { 
     getAllProducts, 
     createProduct,
@@ -8,7 +8,7 @@ import {
     // getRecommendedProducts,
     getFeaturedProducts,
     getProductByCategory
-} from "../controllers/products.controller"
+} from "../controllers/products.controller.js"
 
 const router = express.Router()
 

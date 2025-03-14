@@ -17,7 +17,6 @@ export const getAllProducts = async (req, res)=>{
     }
 }
 
-
 // create product 
 export const createProduct = async (req, res)=>{
     try{
@@ -44,7 +43,6 @@ export const createProduct = async (req, res)=>{
     }
 }
 
-
 // toggle featured product - using id 
 export const toggleFeaturedProduct = async (req, res)=>{
     try{
@@ -67,7 +65,6 @@ export const toggleFeaturedProduct = async (req, res)=>{
         res.status(500).json({message: error.message})
     }
 }
-
 
 // delete product - using id 
 export const deleteProduct = async (req, res)=>{
@@ -97,7 +94,6 @@ export const deleteProduct = async (req, res)=>{
     }
 }
 
-
 // get featured products
 export const getFeaturedProducts = async (req, res)=>{
     try{
@@ -122,7 +118,6 @@ export const getFeaturedProducts = async (req, res)=>{
         res.status(500).json({message: error.message})
     }
 }
-
 
 // get products by category
 export const getProductByCategory = async (req, res)=>{

@@ -14,7 +14,7 @@ app.use(express.json())
 app.use(cookieParser())
 
 app.use("/api/auth", authRoutes)        // registers the authRoutes router
-app.use("/products", productRoutes)     // registers the productRoutes router
+app.use("/api/products", productRoutes)     // registers the productRoutes router
 
 app.listen(PORT, ()=>{
     console.log(`Server running on http://localhost:${PORT}`)

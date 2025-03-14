@@ -68,7 +68,6 @@ const signup = async (req, res)=>{
     }
 }
 
-
 // login
 const login = async(req, res)=>{
     try{
@@ -101,7 +100,6 @@ const login = async(req, res)=>{
     }
 }
 
-
 // logout - allow logout only if access token given
 const logout = async (req, res)=>{
     try{
@@ -121,7 +119,6 @@ const logout = async (req, res)=>{
         res.status(500).json({message: error.message})
     }
 }
-
 
 // refresh access token 
 // get the refresh token from cookies, check if it matches with the redis one, then provide new access token
