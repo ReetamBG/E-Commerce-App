@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken"
 import User from "../models/user.model.js"
 
-// verifies access token and sends user to adminRoute() middleware
+// verifies access token
 export const protectRoute = async (req, res, next)=>{
     try{
         const accessToken = req.cookies.accessToken

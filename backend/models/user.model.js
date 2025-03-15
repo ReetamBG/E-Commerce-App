@@ -24,11 +24,11 @@ const userSchema = new mongoose.Schema(
             {
                 quantity: {
                     type: Number,
-                    default: 1      // each item added starts with 1 quantity
+                    default: 1,      // each item added starts with 1 quantity
                 },
-                product: {
-                    type: mongoose.Schema.Types.ObjectId,       // foreign key
-                    ref: "Product"
+                productId: {
+                    type: mongoose.Schema.Types.ObjectId,       // mongodb object id datatype
+                    ref: "Product"                              // foreign key
                 }
             }
         ],
@@ -48,7 +48,7 @@ const userSchema = new mongoose.Schema(
 
 // adding password hashing - runs this before saving userSchema
 userSchema.pre("save", async function (next){           // here next is from mongoose middleware not express
-    if(!this.isModified("password")) return next()      // if not modified do nothing
+    if(!this.isModified("password")) return next()           // if not modified do nothing
     
     try{
         const salt = await bcrypt.genSalt(10)
