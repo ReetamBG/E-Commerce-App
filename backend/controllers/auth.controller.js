@@ -36,7 +36,6 @@ const storeRefreshToken = async (userId, refreshToken)=>{
     await redis.set(`refreshToken:${userId}`, refreshToken, "EX", 7 * 24 * 60 * 60)     // expires in 7 days (EX => seconds)
 }
 
-
 // signup
 const signup = async (req, res)=>{
     try{
@@ -53,10 +52,10 @@ const signup = async (req, res)=>{
         res.status(201).json(
             {
                 user: {
-                    userId: user._id,
-                    userName: user.name, 
-                    userEmail: user.email,
-                    userRole: user.role
+                    id: user._id,
+                    name: user.name, 
+                    email: user.email,
+                    role: user.role
                 },
                 message: "Signup successful"
             }
@@ -81,10 +80,10 @@ const login = async(req, res)=>{
             res.status(200).json(
                 {
                     user: {
-                        userId: user._id,
-                        userName: user.name, 
-                        userEmail: user.email,
-                        userRole: user.role
+                        id: user._id,
+                        name: user.name, 
+                        email: user.email,
+                        role: user.role
                     },
                     message: "Login successful"
                 }
@@ -116,6 +115,17 @@ const logout = async (req, res)=>{
     }
     catch(error){
         console.log("Error in logout controller: " + error)
+        res.status(500).json({message: error.message})
+    }
+}
+
+// get the user profile
+const getProfile = async (req, res)=>{
+    try{
+        res.status(200).json({user: req.user})
+    }
+    catch(error){
+        console.log("Error in getProfile controller :", error)
         res.status(500).json({message: error.message})
     }
 }
@@ -152,4 +162,4 @@ const refreshAccessToken = async (req, res)=>{
     }
 }
 
-export {signup, login, logout, refreshAccessToken}
+export {signup, login, logout, refreshAccessToken, getProfile}
