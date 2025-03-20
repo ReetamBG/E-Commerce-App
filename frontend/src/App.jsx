@@ -1,9 +1,11 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import { useEffect } from "react"
-import Navbar from "./components/Navbar"
-import Signup from "./pages/Signup"
-import Login from "./pages/Login"
 import { Toaster } from "react-hot-toast"
+import Navbar from "./components/Navbar"
+import SignupPage from "./pages/SignupPage"
+import LoginPage from "./pages/LoginPage"
+import HomePage from "./pages/HomePage"
+import AdminPage from "./pages/AdminPage"
 import useUserStore from "./stores/useUserStore"
 import LoadingSpinner from "./components/LoadingSpinner"
 
@@ -16,15 +18,16 @@ function App() {
   if (checkingAuth) {
     return <LoadingSpinner />
   }
-  
+
   return (
     <BrowserRouter>
       <Toaster />
       <Navbar />
       <Routes>
-        <Route path="/" element={<h1></h1>} />
-        <Route path="/login" element={!user ? <Login /> : <Navigate to="/" />} />
-        <Route path="/signup" element={!user ? <Signup /> : <Navigate to="/" />} />
+        <Route path="/" element={<HomePage />} />
+        <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/" />} />
+        <Route path="/signup" element={!user ? <SignupPage /> : <Navigate to="/" />} />
+        <Route path="/dashboard" element={<AdminPage />} />
       </Routes>
     </BrowserRouter>
   )

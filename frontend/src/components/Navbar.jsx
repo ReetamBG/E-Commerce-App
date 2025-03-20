@@ -10,7 +10,7 @@ const Navbar = () => {
   const cartLength = 5
 
   return (
-    <header className="w-full sticky top-0">
+    <header className="w-full sticky top-0 z-50 bg-white">
       <div className="flex justify-between py-6 px-15 text-gray-800 relative">
         <Link to="/" className="text-2xl font-bold flex gap-2"><LiaShopware />ReeKart</Link>
         <nav className="flex gap-5 items-center">
