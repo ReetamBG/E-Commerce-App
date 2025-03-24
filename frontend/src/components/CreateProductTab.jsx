@@ -38,6 +38,7 @@ const CreateProductTab = () => {
     e.preventDefault()
     createProduct(product)
     setProduct({name: "", description: "", category: "", price: "", image: ""})
+    document.getElementById("imageUpload").value = ""
   }
 
   return (
@@ -94,10 +95,11 @@ const CreateProductTab = () => {
       <input
         type="file"
         accept=".jpg, .jpeg, .png"
+        id="imageUpload"
         name="image"
         onChange={handleImageChange}
         className="m-2 p-3 border border-gray-300 
-                rounded-lg focus:outline-none 
+                rounded-lg focus:outline-none w-75
                 focus:ring-2 focus:ring-blue-300 transition duration-250"
       />
       <button

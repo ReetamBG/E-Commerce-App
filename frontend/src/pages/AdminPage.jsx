@@ -1,9 +1,16 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import CreateProductTab from "../components/CreateProductTab"
 import ProductListTab from "../components/ProductListTab"
 import AnalyticsTab from "../components/AnalyticsTab"
+import useProductStore from "../stores/useProductStore"
 
 const AdminPage = () => {
+
+  // fetch all products on admin page load
+  const { getAllProducts } = useProductStore()
+  useEffect(() => {
+    getAllProducts()
+  }, [getAllProducts])
 
   const [activeTab, setActiveTab] = useState("create")
   const handleClick = (id) => {

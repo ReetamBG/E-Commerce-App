@@ -3,11 +3,12 @@ import { HiMiniUserPlus } from "react-icons/hi2";     // signup icon
 import { LiaShopware } from "react-icons/lia";
 import { IoIosLogOut } from "react-icons/io";
 import useUserStore from "../stores/useUserStore";
+import useCartStore from "../stores/useCartStore";
 
 const Navbar = () => {
-  const {user, logout} = useUserStore()
+  const { user, logout } = useUserStore()
   const isAdmin = user?.role === "admin"
-  const cartLength = 5
+  const { cartItems } = useCartStore()
 
   return (
     <header className="w-full sticky top-0 z-50 bg-white">
@@ -20,8 +21,10 @@ const Navbar = () => {
             {user && (
               <>
                 <Link to="/cart" className="relative hover:underline underline-offset-5">
-                  {cartLength > 0 && (
-                    <span className="bg-black text-white text-xs rounded-full px-2 py-1 absolute -top-4 -left-4">{cartLength}</span>
+                  {cartItems.length > 0 && (
+                    <span className="bg-black text-white text-xs rounded-full px-2 py-1 absolute -top-4 -left-4">
+                      {cartItems.length}
+                    </span>
                   )}
                   CART
                 </Link>
