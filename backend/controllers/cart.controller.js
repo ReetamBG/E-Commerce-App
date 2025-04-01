@@ -1,26 +1,27 @@
 import Product from "../models/product.model.js";
 
-export const getCartProducts = async (req, res)=>{
+export const getCartItems = async (req, res)=>{
     try {
-        const user = req.user                                                  // user from the protectRoute middleware
-
+        const user = req.user                                               // user from the protectRoute middleware
 
         // const productIds = user.cartItems.map(item => item.product)         // get the product ids of the items in cart
-        // const products = Product.find({_id: {$in: productIds}})             // get the products
-        //
+        // const products = await Product.find({_id: {$in: productIds}})       // get the products
+        
         // // add quantity of each item
-        // const items = user.cartItems.map(cartItem => {
+        // const cartItems = user.cartItems.map(cartItem => {
         //     const product = products.find(product => product._id.toString() === cartItem.product.toString())
-        //     return {...product.toObject(), quantity: cartItem.quantity}
+        //     return product ? {...product.toObject(), quantity: cartItem.quantity} : null
         // })
 
 
         // just use populate() why go through all this hassle
         // populate() is a method available on mongoose objects
         // that automatically replaces ObjectIds with the actual referenced documents.
-        const userPopulated = await user.populate("cartItems.productId").exec()        // populate the cartItems.product field of user
-        const cartItems = userPopulated.cartItems
-        res.status(200).json({cartItems: cartItems})
+        const userPopulated = await user.populate("cartItems.productId")        // populate the cartItems.product field of user
+        const cartItems = userPopulated.cartItems.map((item)=>(
+            {...item.productId.toObject(), quantity: item.quantity}             // appending quantity to product
+        ))
+        res.status(200).json({ cartItems })
     }
     catch(error) {
         console.log("Error in getCartProducts controller: " + error)

@@ -5,7 +5,7 @@ import {
     createProduct,
     toggleFeaturedProduct,
     deleteProduct,
-    // getRecommendedProducts,
+    getRecommendedProducts,
     getFeaturedProducts,
     getProductByCategory
 } from "../controllers/product.controller.js"
@@ -16,10 +16,10 @@ const router = express.Router()
 // pass the request through protectRoute() -> adminRoute() -> getAllProducts()
 router.get("/", protectRoute, adminRoute, getAllProducts)                   // get all products       
 router.post("/", protectRoute, adminRoute, createProduct)                   // create a new product
-router.patch(":id", protectRoute, adminRoute, toggleFeaturedProduct)        // toggle isFeatured on a product
+router.patch("/:id", protectRoute, adminRoute, toggleFeaturedProduct)       // toggle isFeatured on a product
 router.delete("/:id", protectRoute, adminRoute, deleteProduct)              // delete a product
 
-// router.get("/recommended", getRecommendedProducts)                            // get products recommended for the user
+router.get("/recommended", getRecommendedProducts)                            // get products recommended for the user
 router.get("/featured", getFeaturedProducts)                                // get featured products
 router.get("/category/:category", getProductByCategory)                     // get products by category
 

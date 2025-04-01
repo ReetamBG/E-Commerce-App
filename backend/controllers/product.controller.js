@@ -9,7 +9,7 @@ export const getAllProducts = async (req, res)=>{
         if(!products.length){
             return res.status(404).json({message: "No products found"})
         }
-        res.status(200).json(products)
+        res.status(200).json({products})
     }
     catch(error){
         console.log("Error in getAllProducts controller: " + error.message)
@@ -100,7 +100,7 @@ export const getFeaturedProducts = async (req, res)=>{
         // search in redis cache first
         let featuredProducts = await redis.get("featuredProducts")
         if(featuredProducts){
-           return res.json(JSON.parse(featuredProducts))   
+           return res.json({products: JSON.parse(featuredProducts)})   
            //redis stores items as strings so converting back to json using JSON.parse()
         }
 
@@ -111,7 +111,7 @@ export const getFeaturedProducts = async (req, res)=>{
         }
         await redis.set("featuredProducts", JSON.stringify(featuredProducts))
         // redis stores values as strings so using stringify() 
-        res.json(featuredProducts)
+        res.json({products: featuredProducts})
     }
     catch(error){
         console.log("Error in getFeaturedProducts controller: " + error.message)
@@ -124,10 +124,30 @@ export const getProductByCategory = async (req, res)=>{
     try{
         const category = req.params.category
         const products = await Product.find({category})
-        res.status(200).json(products)
+        res.status(200).json({products})
     }
     catch(error){
         console.log("Error in getProductByCategory controller: " + error.message)
+        res.status(500).json({message: error.message})
+    }
+}
+
+// get recommended products - probably make a ML recommendation system later
+export const getRecommendedProducts = async (req, res)=>{
+    try {
+        const products = await Product.aggregate([
+            { $sample: {size: 4} },
+            { $project: {
+                _id: 1,
+                name: 1,
+                description: 1,
+                image: 1,
+                price: 1
+            }}
+        ])
+        res.status(200).json({products})
+    } catch (error) {
+        console.log("Error in getRecommendedProducts controller: " + error.message)
         res.status(500).json({message: error.message})
     }
 }
